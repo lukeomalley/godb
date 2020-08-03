@@ -2,6 +2,7 @@ package executor
 
 import (
 	"fmt"
+	"strconv"
 )
 
 // Tuple represents a single tuple from a database table.
@@ -22,6 +23,7 @@ type OperatorType int
 const (
 	SCAN OperatorType = iota
 	FILTER
+	LIMIT
 	PROJECTION
 )
 
@@ -59,17 +61,28 @@ func (op *OperatorParser) parseOperator(operator Operator) Iterator {
 	switch operator.name {
 	case SCAN:
 		return NewScanIterator(op.tuples)
+	case LIMIT:
+		nextIterator := op.parseNextOperator()
+		limit := parseLimitParameters(operator.parameters)
+		return NewLimitIterator(nextIterator, limit)
 	case FILTER:
-		// Parse the next operator to be passed into the FilterIterator
-		nextIterator := op.parseOperator(op.operators[op.currIdx+1])
-		op.currIdx++
-
+		nextIterator := op.parseNextOperator()
 		exp := parseFilterParameters(operator.parameters)
 		return NewFilterIterator(exp, nextIterator)
 	}
 
 	panic(fmt.Sprintf("Unknown operator %v", operator))
 }
+
+func (op *OperatorParser) parseNextOperator() Iterator {
+	nextIterator := op.parseOperator(op.operators[op.currIdx+1])
+	op.currIdx++
+	return nextIterator
+}
+
+// ============================================================================
+// Helper Methods
+// ============================================================================
 
 func parseFilterParameters(filterParams []string) BinaryExpression {
 	if len(filterParams) != 3 {
@@ -86,4 +99,17 @@ func parseFilterParameters(filterParams []string) BinaryExpression {
 	}
 
 	panic(fmt.Sprintf("Unknown filter operator %s", filterParams[1]))
+}
+
+func parseLimitParameters(limitParameters []string) int {
+	if len(limitParameters) > 1 {
+		panic(fmt.Sprintf("Limit expected 1 integer parameter, but got: %s", limitParameters))
+	}
+
+	i, err := strconv.Atoi(limitParameters[0])
+	if err != nil {
+		panic(err)
+	}
+
+	return i
 }

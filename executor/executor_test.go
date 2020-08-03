@@ -65,6 +65,38 @@ func TestFilterIterator(t *testing.T) {
 	}
 }
 
+func TestLimitIterator(t *testing.T) {
+	tests := []struct {
+		operators      []Operator
+		expectedTuples int
+		expectedValue  string
+	}{
+		{
+			operators: []Operator{
+				{name: LIMIT, parameters: []string{"1"}},
+				{name: SCAN, parameters: []string{}},
+			},
+			expectedTuples: 1,
+		},
+		{
+			operators: []Operator{
+				{name: LIMIT, parameters: []string{"2"}},
+				{name: SCAN, parameters: []string{}},
+			},
+			expectedTuples: 2,
+		},
+	}
+
+	for _, tt := range tests {
+		tuples := buildTestTuples()
+		result := execute(tt.operators, tuples)
+
+		if len(result) != tt.expectedTuples {
+			t.Fatalf("Result does not contain %d tuples got %d.", tt.expectedTuples, len(result))
+		}
+	}
+}
+
 // ============================================================================
 // Test Helpers
 // ============================================================================

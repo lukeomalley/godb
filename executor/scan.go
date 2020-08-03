@@ -17,7 +17,7 @@ func (si *ScanIterator) Init() {
 	// Initialization
 }
 
-// Next returns a boolean stating whether of not the Iterator is complete
+// Next returns a boolean stating whether of not the Iterator has more tuples to emit
 func (si *ScanIterator) Next() bool {
 	return si.idx <= len(si.tuples)-1
 }
