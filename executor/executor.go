@@ -1,5 +1,6 @@
 package executor
 
+// Executor handles the execution of a query plan against an slice of tuples
 type Executor struct {
 	tuples    []Tuple
 	iterators []Iterator
@@ -14,17 +15,13 @@ func NewExecutor(iterators []Iterator, tuples []Tuple) *Executor {
 func (e *Executor) Run() []Tuple {
 	result := []Tuple{}
 
-	for _, iterator := range e.iterators {
-		iterator
+	e.iterators[0].Init()
+
+	for e.iterators[0].Next() {
+		result = append(result, e.iterators[0].Execute())
 	}
 
 	return result
-}
-
-// NewQueryPlan constructs a query plan
-func NewQueryPlan(input []Operator) *QueryPlan {
-	qp := &QueryPlan{operators: input}
-	return qp
 }
 
 func newTuple(inputs ...interface{}) Tuple {

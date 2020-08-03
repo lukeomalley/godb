@@ -19,7 +19,6 @@ func NewFilterIterator(exp BinaryExpression, child Iterator) Iterator {
 // calling Next.
 func (fi *FilterIterator) Init() {
 	// Initialization
-	fi.child.Init()
 }
 
 // Next calls Next on its child iterator until it finds a tuple that
@@ -27,7 +26,7 @@ func (fi *FilterIterator) Init() {
 func (fi *FilterIterator) Next() bool {
 	for fi.child.Next() {
 		tuple := fi.child.Execute()
-		if f.expression.Execute(tuple) {
+		if fi.expression.Execute(tuple) {
 			fi.curr = tuple
 			return true
 		}
@@ -38,7 +37,7 @@ func (fi *FilterIterator) Next() bool {
 
 // Execute returns the current tuple that meets the condition
 func (fi *FilterIterator) Execute() Tuple {
-
+	return fi.curr
 }
 
 // Close handles cleanup

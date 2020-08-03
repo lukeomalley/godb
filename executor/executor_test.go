@@ -12,47 +12,70 @@ func TestScanIterator(t *testing.T) {
 			{name: SCAN, parameters: []string{}},
 		}
 
-	parser := NewOperatorParser(operators)
+	result := execute(operators, tuples)
 
-	iterators := parser.ParseQueryPlan()
-
-	e := New(iterators, tuples)
-
-	result := e.Run()
-
-	if len(result) != 4 {
-		t.Fatalf("Result does not contain 3 tuples got %d.", len(result))
+	if len(result) != 5 {
+		t.Fatalf("Result does not contain 4 tuples got %d.", len(result))
 	}
 }
 
 func TestFilterIterator(t *testing.T) {
-	tuples := buildTestTuples()
+	tests := []struct {
+		operators      []Operator
+		expectedTuples int
+		expectedValue  string
+	}{
+		{
+			operators: []Operator{
+				{name: FILTER, parameters: []string{"name", "=", "luke"}},
+				{name: SCAN, parameters: []string{}},
+			},
+			expectedTuples: 2,
+			expectedValue:  "luke",
+		},
+		{
+			operators: []Operator{
+				{name: FILTER, parameters: []string{"name", "=", "meagan"}},
+				{name: SCAN, parameters: []string{}},
+			},
+			expectedTuples: 1,
+			expectedValue:  "meagan",
+		},
+		{
+			operators: []Operator{
+				{name: FILTER, parameters: []string{"age", "=", "12"}},
+				{name: SCAN, parameters: []string{}},
+			},
+			expectedTuples: 1,
+			expectedValue:  "randy",
+		},
+	}
 
-	operators :=
-		[]Operator{
-			{name: FILTER, parameters: []string{"name", "=", "luke"}},
-			{name: SCAN, parameters: []string{}},
+	for _, tt := range tests {
+		tuples := buildTestTuples()
+		result := execute(tt.operators, tuples)
+
+		if len(result) != tt.expectedTuples {
+			t.Fatalf("Result does not contain %d tuples got %d.", tt.expectedTuples, len(result))
 		}
 
-	queryPlan := NewQueryPlan(operators)
-
-	e := New(*queryPlan, tuples)
-
-	result := e.Run()
-
-	if len(result) != 1 {
-		t.Fatalf("Result does not contain 1 tuples got %d.", len(result))
+		if result[0].Values[1].Value != tt.expectedValue {
+			t.Fatalf("Result did not filter correctly. Expected tuple name to equal %s. got=%s", tt.expectedValue, result[0].Values[1].Value)
+		}
 	}
-
-	if result[0].Values[0].Value != "luke" {
-		t.Fatalf("Result did not filter correctly. Exptecte tuple name to equal luke. got=%s", result[0].Values[0].Value)
-	}
-
 }
 
 // ============================================================================
 // Test Helpers
 // ============================================================================
+
+func execute(operators []Operator, tuples []Tuple) []Tuple {
+	parser := NewOperatorParser(operators, tuples)
+	iterators := parser.ParseQueryPlan()
+	e := NewExecutor(iterators, tuples)
+
+	return e.Run()
+}
 
 func buildTestTuples() []Tuple {
 	return []Tuple{
@@ -60,5 +83,6 @@ func buildTestTuples() []Tuple {
 		newTuple("id", "2", "name", "meagan", "age", "22"),
 		newTuple("id", "3", "name", "elon", "age", "30"),
 		newTuple("id", "4", "name", "randy", "age", "12"),
+		newTuple("id", "5", "name", "luke", "age", "32"),
 	}
 }

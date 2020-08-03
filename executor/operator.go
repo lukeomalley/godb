@@ -1,5 +1,9 @@
 package executor
 
+import (
+	"fmt"
+)
+
 // Tuple represents a single tuple from a database table.
 type Tuple struct {
 	Values []Value
@@ -43,8 +47,8 @@ func NewOperatorParser(operators []Operator, tuples []Tuple) *OperatorParser {
 // ParseQueryPlan parses a query plan of operators and returns
 // a tree or iterator nodes
 func (op *OperatorParser) ParseQueryPlan() []Iterator {
-	for op.currIdx < len(op.operators)-1 {
-		op.iterators = append(op.parseOperator(op.operators[op.currIdx]))
+	for op.currIdx <= len(op.operators)-1 {
+		op.iterators = append(op.iterators, op.parseOperator(op.operators[op.currIdx]))
 		op.currIdx++
 	}
 
@@ -63,6 +67,8 @@ func (op *OperatorParser) parseOperator(operator Operator) Iterator {
 		exp := parseFilterParameters(operator.parameters)
 		return NewFilterIterator(exp, nextIterator)
 	}
+
+	panic(fmt.Sprintf("Unknown operator %v", operator))
 }
 
 func parseFilterParameters(filterParams []string) BinaryExpression {
@@ -78,4 +84,6 @@ func parseFilterParameters(filterParams []string) BinaryExpression {
 	case ">":
 		return NewGTExpression(filterParams[0], filterParams[2])
 	}
+
+	panic(fmt.Sprintf("Unknown filter operator %s", filterParams[1]))
 }

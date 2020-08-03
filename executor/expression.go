@@ -1,5 +1,7 @@
 package executor
 
+import "fmt"
+
 // BinaryExpression is the interface for an expression that returns true or false
 type BinaryExpression interface {
 	Execute(Tuple) bool
@@ -12,18 +14,24 @@ type BinaryExpression interface {
 // LTExpression is a BinaryExpression that returns whether the left expression
 // is less than the right
 type LTExpression struct {
-	left  string
-	right string
+	key   string
+	value string
 }
 
 // NewLTExpression constructs a LTExpression
-func NewLTExpression(left, right string) BinaryExpression {
-	return &LTExpression{left: left, right: right}
+func NewLTExpression(key, value string) BinaryExpression {
+	return &LTExpression{key: key, value: value}
 }
 
 // Execute returns the result of applying the LTExpression
-func (lt *LTExpression) Execute() bool {
-	return lt.left < lt.right
+func (lt *LTExpression) Execute(tuple Tuple) bool {
+	for _, v := range tuple.Values {
+		if v.Key == lt.key {
+			return v.Value < lt.value
+		}
+	}
+
+	panic(fmt.Sprintf("tuple: %v did not contain field: %s", tuple, lt.key))
 }
 
 // ============================================================================
@@ -33,18 +41,24 @@ func (lt *LTExpression) Execute() bool {
 // GTExpression is a BinaryExpression that returns whether the left
 // is greater than the right
 type GTExpression struct {
-	left  string
-	right string
+	key   string
+	value string
 }
 
 // NewGTExpression creates a new GTExpression
-func NewGTExpression(left, right string) BinaryExpression {
-	return &GTExpression{left: left, right: right}
+func NewGTExpression(key, value string) BinaryExpression {
+	return &GTExpression{key: key, value: value}
 }
 
 // Execute returns the result of applying the GT Expresison condition
-func (gt *GTExpression) Execute() bool {
-	return gt.left > gt.right
+func (gt *GTExpression) Execute(tuple Tuple) bool {
+	for _, v := range tuple.Values {
+		if v.Key == gt.key {
+			return v.Value > gt.value
+		}
+	}
+
+	panic(fmt.Sprintf("tuple: %v did not contain field: %s", tuple, gt.key))
 }
 
 // ============================================================================
@@ -54,16 +68,22 @@ func (gt *GTExpression) Execute() bool {
 // EQExpression is a BinaryExpression that returns whether the left
 // is equal to the right expression
 type EQExpression struct {
-	left  string
-	right string
+	key   string
+	value string
 }
 
 // NewEQExpression creates a new EQExpression
-func NewEQExpression(left, right string) BinaryExpression {
-	return &GTExpression{left: left, right: right}
+func NewEQExpression(key, value string) BinaryExpression {
+	return &EQExpression{key: key, value: value}
 }
 
 // Execute returns the result of applying the EQExpresison condition
-func (gt *EQExpression) Execute() bool {
-	return gt.left == gt.right
+func (eq *EQExpression) Execute(tuple Tuple) bool {
+	for _, v := range tuple.Values {
+		if v.Key == eq.key {
+			return v.Value == eq.value
+		}
+	}
+
+	panic(fmt.Sprintf("tuple: %v did not contain field: %s", tuple, eq.key))
 }

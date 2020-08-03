@@ -19,11 +19,11 @@ func (si *ScanIterator) Init() {
 
 // Next returns a boolean stating whether of not the Iterator is complete
 func (si *ScanIterator) Next() bool {
-	return si.idx > len(si.tuples)-1
+	return si.idx <= len(si.tuples)-1
 }
 
 // Execute returns the scanned tuples in order
-func (si *ScanIterator) Execute() {
+func (si *ScanIterator) Execute() Tuple {
 	result := si.tuples[si.idx]
 	si.idx++
 	return result
