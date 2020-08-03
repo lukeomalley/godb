@@ -23,20 +23,3 @@ func (e *Executor) Run() []Tuple {
 
 	return result
 }
-
-func newTuple(inputs ...interface{}) Tuple {
-	if len(inputs)%2 != 0 {
-		panic("number of inputs to newTuple must be even")
-	}
-
-	tuple := Tuple{Values: make([]Value, 0, len(inputs)/2)}
-
-	for i := 0; i < len(inputs); i += 2 {
-		tuple.Values = append(tuple.Values, Value{
-			Key:   inputs[i].(string),
-			Value: inputs[i+1].(string),
-		})
-	}
-
-	return tuple
-}
