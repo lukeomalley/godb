@@ -12,8 +12,9 @@ type Tuple struct {
 
 // Value represents a row, column value in a single tuple.
 type Value struct {
-	Key   string
-	Value string
+	Key         string
+	Value       string
+	StringValue string
 }
 
 // OperatorType is an enum that represents the types of operators.

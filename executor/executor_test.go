@@ -128,8 +128,9 @@ func newTuple(inputs ...interface{}) Tuple {
 
 	for i := 0; i < len(inputs); i += 2 {
 		tuple.Values = append(tuple.Values, Value{
-			Key:   inputs[i].(string),
-			Value: inputs[i+1].(string),
+			Key:         inputs[i].(string),
+			Value:       inputs[i+1].(string),
+			StringValue: inputs[i+1].(string),
 		})
 	}
 
